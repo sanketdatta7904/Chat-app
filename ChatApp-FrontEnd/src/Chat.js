@@ -7,6 +7,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MicIcon from '@mui/icons-material/Mic';
 import axios from './axios';
+import { useParams } from 'react-router-dom';
 
 
 
@@ -14,6 +15,22 @@ import axios from './axios';
 function Chat({messages}) {
     const [seed, setSeed] = useState("")
     const [input, setInput] = useState('')
+    const {roomId} = useParams()
+    const[roomName, setRoomName] = useState()
+
+    useEffect(() => {
+        if(roomId){
+            let endPoint = "/rooms/"+roomId
+            axios.get(endPoint)
+            .then(response => {
+                console.log(response)
+                return setRoomName(response.data.name)
+
+            }
+            )
+        }
+    }, [roomId])
+
     useEffect(() => {
         setSeed(Math.floor(Math.random() * 500))
 
@@ -35,7 +52,7 @@ function Chat({messages}) {
             <div className="chat_header">
                 <Avatar src = {`https://avatars.dicebear.com/api/human/${seed}.svg`}/>
                 <div className="chat_headerInfo">
-                    <h3>Room Name</h3>
+                    <h3>{roomName}</h3>
                     <p>last seen at...</p>
                 </div>
                 <div className="chat_headerRight">
