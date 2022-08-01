@@ -9,61 +9,52 @@ import {
   Routes,
   Route
 } from "react-router-dom";
+import Login from './Login'
+import { useStateValue } from "./StateProvider"
+import { actionTypes } from './reducer'
 
 function App() {
-  const [messages, setMessages] = useState([])
-  const [user, setUser] = useState("sanket")
+  // const [messages, setMessages] = useState([])
+  // const [user, setUser] = useState("")
+  const [{ user }, dispatch] = useStateValue()
+
+  // useEffect(() => {
+  //   console.log(JSON.stringify(localStorage.getItem("user"), null, 5 ))
+  //   if (localStorage.getItem("user")) {
+  //     dispatch({
+  //       type: actionTypes.SET_USER,
+  //       user: localStorage.getItem("user")
+  //     })
+  //   }
+  // }, [])
 
 
 
-  useEffect(() => {
-    axios.get('/messages/sync')
-      .then(response => {
-        setMessages(response.data)
-      })
-  }, [])
-
-
-
-  useEffect(() => {
-    const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-      cluster: 'ap2'
-    });
-
-    const channel = pusher.subscribe('messages');
-    channel.bind('inserted', function (newMessage) {
-      setMessages([...messages, newMessage])
-    });
-    return () => {
-      channel.unbind_all()
-      channel.unsubscribe()
-    }
-  }, [messages])
 
   return (
     <div className="app">
-      {!user?
-      <h1>Login</h1>  
-      :
-      
-      <div className="app_body">
-        <Router>
-        <Sidebar />
-          <Routes>
-            <Route path="/rooms/:roomId" element={<Chat messages={messages} />}>
-              
-            </Route>
-            <Route path="/" element={<h1>Home Screen</h1>}>
-              
-            </Route>
+      {!user ?
+        <Login />
+        :
 
-          </Routes>
+        <div className="app_body">
+          <Router>
+            <Sidebar />
+            <Routes>
+              <Route path="/rooms/:roomId" element={<Chat />}>
 
-        </Router>
+              </Route>
+              <Route path="/" element={<h1>Home Screen</h1>}>
 
-      </div>
-    
-    }
+              </Route>
+
+            </Routes>
+
+          </Router>
+
+        </div>
+
+      }
     </div>
   );
 }

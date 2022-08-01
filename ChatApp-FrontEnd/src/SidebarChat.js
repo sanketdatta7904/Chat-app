@@ -3,21 +3,34 @@ import { Avatar } from "@mui/material"
 import "./SidebarChat.css"
 import axios from './axios'
 import { Link } from 'react-router-dom'
+import { useStateValue } from "./StateProvider"
 
 
 
 function SidebarChat({ id, name, addNewChat }) {
     const [seed, setSeed] = useState("")
+    const [messages, setMessages] = useState("")
+
     useEffect(() => {
         setSeed(Math.floor(Math.random() * 5000))
     }, [])
 
+    useEffect(() => {
+        if (id) {
+            let endPoint = '/rooms/' + id + '/lastMessage'
+            axios.get(endPoint)
+                .then(message => {
+                    console.log(messages, message.data)
+                    setMessages(message.data)
+                })
 
-    const createChat = () => {
+        }
+    }, [id])
+
+    const createChat = async () => {
         const roomName = prompt("Please enter name for chat");
         if (roomName) {
-            //do some stuff bruhh
-            axios.post("/rooms/new", {
+            await axios.post("/rooms/new", {
                 name: roomName
             })
         }
@@ -28,7 +41,7 @@ function SidebarChat({ id, name, addNewChat }) {
                 <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
                 <div className="sidebarChat_info">
                     <h2>{name}</h2>
-                    <p>this is last message</p>
+                    <p>{messages}</p>
                 </div>
             </div>
         </Link>

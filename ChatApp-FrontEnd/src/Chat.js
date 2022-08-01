@@ -8,23 +8,52 @@ import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MicIcon from '@mui/icons-material/Mic';
 import axios from './axios';
 import { useParams } from 'react-router-dom';
+import {useStateValue} from "./StateProvider";
+import moment from "moment";
+import Pusher from "pusher-js"
 
+import {actionTypes} from "./reducer"
 
-
-
-function Chat({messages}) {
+function Chat() {
     const [seed, setSeed] = useState("")
     const [input, setInput] = useState('')
     const {roomId} = useParams()
     const[roomName, setRoomName] = useState()
+    const [messages, setMessages] = useState([])
+    const [{user}, dispatch] = useStateValue()
+    // const [rooms, setRooms] = useState([])
+
+
+    useEffect(() => {
+        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
+            cluster: 'ap2'
+        });
+
+        const channel = pusher.subscribe('rooms');
+        channel.bind('inserted', function (newRoom) {
+
+            const newMessage = newRoom.messages
+            console.log(JSON.stringify(newRoom.messages))
+            if(newMessage){
+                setMessages([...messages, newMessage ])
+            }
+        });
+        return () => {
+            channel.unbind_all()
+            channel.unsubscribe()
+            channel.cancelSubscription()
+        }
+    }, [messages])
 
     useEffect(() => {
         if(roomId){
             let endPoint = "/rooms/"+roomId
             axios.get(endPoint)
             .then(response => {
-                console.log(response)
-                return setRoomName(response.data.name)
+                // console.log(response.data)
+                setRoomName(response.data.name)
+                setMessages(response.data.messages)
+                return
 
             }
             )
@@ -38,14 +67,18 @@ function Chat({messages}) {
 
     const sendMessage = async (e) => {
         e.preventDefault()
-
-        await axios.post('/messages/new', {
-            name: "Sankettt",
-            message: input,
-            timestamp: "Just now!!!",
-            received: false
-        })
-        setInput("")
+        if(roomId){
+            // console.log(user.displayName)
+            let endPoint = "/rooms/"+roomId + "/newMessage"
+            // console.log(endPoint)
+            // console.log(moment().utcOffset('UTC'))
+            await axios.post(endPoint, {
+                name: user.displayName,
+                message: input,
+                timestamp: moment().utcOffset('UTC'),
+            })
+            setInput("")
+        } 
     }
     return (
         <div className='chat'>
@@ -53,7 +86,9 @@ function Chat({messages}) {
                 <Avatar src = {`https://avatars.dicebear.com/api/human/${seed}.svg`}/>
                 <div className="chat_headerInfo">
                     <h3>{roomName}</h3>
-                    <p>last seen at...</p>
+                    <p>{"last seen at "}
+                        {moment(messages[messages.length-1]?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
+                    </p>
                 </div>
                 <div className="chat_headerRight">
                     <IconButton>
@@ -68,14 +103,14 @@ function Chat({messages}) {
                 </div>
             </div>
             <div className="chat_body">
-                {messages.map((message, i) => (
-                    <p key = {message + JSON.stringify(Math.random()*100)}className={`chat_message ${message.received && "chat_receiver" }`}>
+                {messages?.map((message, i) => (
+                    <p key = {message + JSON.stringify(Math.random()*100)}className={`chat_message ${message.name == user.displayName && "chat_receiver" }`}>
                     <span className="chat_name">
                         {message.name}
                     </span>
                     {message.message}
                     <span className="chat_timestamp">
-                    {message.timestamp}
+                    {moment(message?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
                     </span>
 
                 </p>
