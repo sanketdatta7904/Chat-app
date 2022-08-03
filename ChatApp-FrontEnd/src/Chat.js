@@ -8,20 +8,21 @@ import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MicIcon from '@mui/icons-material/Mic';
 import axios from './axios';
 import { useParams } from 'react-router-dom';
-import {useStateValue} from "./StateProvider";
+import { useStateValue } from "./StateProvider";
 import moment from "moment";
 import Pusher from "pusher-js"
 
-import {actionTypes} from "./reducer"
 
 function Chat() {
     const [seed, setSeed] = useState("")
     const [input, setInput] = useState('')
-    const {roomId} = useParams()
-    const[roomName, setRoomName] = useState()
+
+    const { roomId } = useParams()
+    const [roomName, setRoomName] = useState()
     const [messages, setMessages] = useState([])
-    const [{user}, dispatch] = useStateValue()
+    const [{ user }] = useStateValue()
     // const [rooms, setRooms] = useState([])
+
 
 
     useEffect(() => {
@@ -33,9 +34,8 @@ function Chat() {
         channel.bind('inserted', function (newRoom) {
 
             const newMessage = newRoom.messages
-            console.log(JSON.stringify(newRoom.messages))
-            if(newMessage){
-                setMessages([...messages, newMessage ])
+            if (newMessage && Object.keys(newMessage).length !== 0) {
+                setMessages([...messages, newMessage])
             }
         });
         return () => {
@@ -46,17 +46,17 @@ function Chat() {
     }, [messages])
 
     useEffect(() => {
-        if(roomId){
-            let endPoint = "/rooms/"+roomId
+        if (roomId) {
+            let endPoint = "/rooms/" + roomId
             axios.get(endPoint)
-            .then(response => {
-                // console.log(response.data)
-                setRoomName(response.data.name)
-                setMessages(response.data.messages)
-                return
+                .then(response => {
+                    // console.log(response.data)
+                    setRoomName(response.data.name)
+                    setMessages(response.data.messages)
+                    return
 
-            }
-            )
+                }
+                )
         }
     }, [roomId])
 
@@ -67,9 +67,9 @@ function Chat() {
 
     const sendMessage = async (e) => {
         e.preventDefault()
-        if(roomId){
+        if (roomId) {
             // console.log(user.displayName)
-            let endPoint = "/rooms/"+roomId + "/newMessage"
+            let endPoint = "/rooms/" + roomId + "/newMessage"
             // console.log(endPoint)
             // console.log(moment().utcOffset('UTC'))
             await axios.post(endPoint, {
@@ -78,16 +78,17 @@ function Chat() {
                 timestamp: moment().utcOffset('UTC'),
             })
             setInput("")
-        } 
+        }
     }
+   
     return (
         <div className='chat'>
             <div className="chat_header">
-                <Avatar src = {`https://avatars.dicebear.com/api/human/${seed}.svg`}/>
+                <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
                 <div className="chat_headerInfo">
                     <h3>{roomName}</h3>
                     <p>{"last seen at "}
-                        {moment(messages[messages.length-1]?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
+                        {moment(messages[messages.length - 1]?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
                     </p>
                 </div>
                 <div className="chat_headerRight">
@@ -95,7 +96,17 @@ function Chat() {
                         <SearchOutlinedIcon />
                     </IconButton>
                     <IconButton>
-                        <AttachFileIcon />
+                        {/* <input
+                            accept="image/*"
+                            className="input-image"
+                            style={{ display: 'none' }}
+                            id="raised-button-file"
+                            onChange={sendImage}
+                            type="file"
+                        />
+                        <label htmlFor="raised-button-file"> */}
+                            <AttachFileIcon />
+                        {/* </label> */}
                     </IconButton>
                     <IconButton>
                         <MoreVertIcon />
@@ -103,26 +114,32 @@ function Chat() {
                 </div>
             </div>
             <div className="chat_body">
-                {messages?.map((message, i) => (
-                    <p key = {message + JSON.stringify(Math.random()*100)}className={`chat_message ${message.name == user.displayName && "chat_receiver" }`}>
-                    <span className="chat_name">
-                        {message.name}
-                    </span>
-                    {message.message}
-                    <span className="chat_timestamp">
-                    {moment(message?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
-                    </span>
+                {/* {console.log(user.displayName, ">", JSON.stringify(messages, null, 5))} */}
 
-                </p>
-                ))}
+                {messages?.map((message, i) => {
+                    return (
+                        <p key={message + JSON.stringify(Math.random() * 100)} className={`chat_message ${message.name === user.displayName && "chat_receiver"}`}>
+                            <span className="chat_name">
+                                {message.name}
+                            </span>
+                            {message.message}
+                            <span className="chat_timestamp">
+                                {moment(message?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
+                            </span>
+
+                        </p>
+                    )
+
+
+                })}
             </div>
             <div className="chat_footer">
-                <InsertEmoticonIcon/>
+                <InsertEmoticonIcon />
                 <form action="">
-                    <input value={input} onChange={e=> setInput(e.target.value)} placeholder="type a message" type="text" />
+                    <input value={input} onChange={e => setInput(e.target.value)} placeholder="type a message" type="text" />
                     <button onClick={sendMessage} type="submit">Send a message</button>
                 </form>
-                <MicIcon/>
+                <MicIcon />
             </div>
         </div>
     )

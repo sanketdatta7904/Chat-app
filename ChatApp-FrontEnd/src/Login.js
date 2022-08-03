@@ -6,7 +6,7 @@ import { actionTypes } from './reducer'
 import {useStateValue} from "./StateProvider"
 
 function Login() {
-  const [{ }, dispatch] = useStateValue()
+  const [{}, dispatch] = useStateValue()
   const signIn = () => {
     signInWithPopup(auth, provider)
       .then(result => {
@@ -14,7 +14,6 @@ function Login() {
           type: actionTypes.SET_USER,
           user: result.user
         })
-        localStorage.setItem("user", result.user)
       }
         
       )

@@ -4,6 +4,7 @@ import "./SidebarChat.css"
 import axios from './axios'
 import { Link } from 'react-router-dom'
 import { useStateValue } from "./StateProvider"
+import Pusher from "pusher-js"
 
 
 
@@ -20,12 +21,32 @@ function SidebarChat({ id, name, addNewChat }) {
             let endPoint = '/rooms/' + id + '/lastMessage'
             axios.get(endPoint)
                 .then(message => {
-                    console.log(messages, message.data)
-                    setMessages(message.data)
+                    setMessages([message.data])
                 })
 
         }
     }, [id])
+    
+    useEffect(() => {
+        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
+            cluster: 'ap2'
+        });
+
+        const channel = pusher.subscribe('rooms');
+        channel.bind('inserted', function (newRoom) {
+
+            const newMessage = newRoom.messages
+            if(newMessage && newRoom._id == id){
+                setMessages(newMessage.message)
+            }
+        });
+        return () => {
+            channel.unbind_all()
+            channel.unsubscribe()
+            channel.cancelSubscription()
+        }
+    }, [])
+
 
     const createChat = async () => {
         const roomName = prompt("Please enter name for chat");

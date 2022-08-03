@@ -31,7 +31,6 @@ function Sidebar() {
 
         const channel = pusher.subscribe('rooms');
         channel.bind('inserted', function (newRoom) {
-            console.log("in sidebar",newRoom)
             if(newRoom.mongoEvent === "create"){
                 setRooms([...rooms, newRoom])
             }
