@@ -1,17 +1,19 @@
 import './App.css';
-import Sidebar from './Sidebar'
-import Chat from './Chat'
+import Sidebar from './components/Sidebar'
+import Chat from './components/Chat'
 import React, { useEffect, useState } from 'react';
+import Box from '@mui/material/Box';
+
 import Pusher from 'pusher-js'
-import axios from "./axios"
+import axios from "./utils/axios"
 import {
   BrowserRouter as Router,
   Routes,
   Route
 } from "react-router-dom";
-import Login from './Login'
-import { useStateValue } from "./StateProvider"
-import { actionTypes } from './reducer'
+import Login from './components/Login'
+import { useStateValue } from "./context/StateProvider"
+import { actionTypes } from './context/reducer'
 
 function App() {
   // const [messages, setMessages] = useState([])
@@ -44,7 +46,7 @@ function App() {
               <Route path="/rooms/:roomId" element={<Chat />}>
 
               </Route>
-              <Route path="/" element={<h1>Home Screen</h1>}>
+              <Route path="/" element={<h1 className='home-screen'>Please select a room</h1>}>
 
               </Route>
 

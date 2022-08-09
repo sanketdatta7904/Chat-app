@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import './chat.css'
+import '../assets/chat.css'
 import { Avatar, IconButton } from "@mui/material"
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MicIcon from '@mui/icons-material/Mic';
-import axios from './axios';
+import axios from '../utils/axios';
 import { useParams } from 'react-router-dom';
-import { useStateValue } from "./StateProvider";
+import { useStateValue } from "../context/StateProvider";
 import moment from "moment";
 import Pusher from "pusher-js"
 
@@ -87,7 +87,7 @@ function Chat() {
                 <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
                 <div className="chat_headerInfo">
                     <h3>{roomName}</h3>
-                    <p>{"last seen at "}
+                    <p>{"last active at "}
                         {moment(messages[messages.length - 1]?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
                     </p>
                 </div>

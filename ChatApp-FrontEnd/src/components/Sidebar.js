@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import './sidebar.css'
+import '../assets/sidebar.css'
 import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import { Avatar, IconButton } from "@mui/material"
 import ChatIcon from '@mui/icons-material/Chat';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import SidebarChat from "./SidebarChat"
-import axios from './axios';
+import axios from '../utils/axios';
 import Pusher from "pusher-js"
-import { useStateValue } from "./StateProvider"
+import { useStateValue } from "../context/StateProvider"
 
 function Sidebar() {
     const [rooms, setRooms] = useState([])

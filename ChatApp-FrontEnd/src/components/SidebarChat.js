@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Avatar } from "@mui/material"
-import "./SidebarChat.css"
-import axios from './axios'
+import "../assets/SidebarChat.css"
+import axios from '../utils/axios'
 import { Link } from 'react-router-dom'
-import { useStateValue } from "./StateProvider"
+import { useStateValue } from "../context/StateProvider"
 import Pusher from "pusher-js"
 
 

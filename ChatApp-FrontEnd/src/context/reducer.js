@@ -1,6 +1,5 @@
 export const initialState = {
-    user: null,
-    lastMessage: null,
+    user: null
 }
 
 export const actionTypes = {
