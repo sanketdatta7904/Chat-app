@@ -24,8 +24,8 @@ function Chat() {
     const [messages, setMessages] = useState([])
     const [{ user }] = useStateValue()
 
-    const signOutSession = () => {
-        signOut(auth)
+    const signOutSession = async () => {
+        await signOut(auth)
             .then(result => {
                 document.location.href = "/";
             }
@@ -41,7 +41,6 @@ function Chat() {
 
         const channel = pusher.subscribe('rooms');
         channel.bind('inserted', function (newRoom) {
-
             const newMessage = newRoom.messages
             if (newMessage && Object.keys(newMessage).length !== 0) {
                 setMessages([...messages, newMessage])
@@ -117,8 +116,8 @@ function Chat() {
                         <AttachFileIcon />
                         {/* </label> */}
                     </IconButton>
-                    <IconButton>
-                        <LogoutIcon onClick={signOutSession} />
+                    <IconButton onClick={signOutSession}>
+                        <LogoutIcon  />
                     </IconButton>
                 </div>
             </div>
