@@ -3,14 +3,16 @@ import '../assets/chat.css'
 import { Avatar, IconButton } from "@mui/material"
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MicIcon from '@mui/icons-material/Mic';
 import axios from '../utils/axios';
 import { useParams } from 'react-router-dom';
 import { useStateValue } from "../context/StateProvider";
+import LogoutIcon from '@mui/icons-material/Logout';
 import moment from "moment";
 import Pusher from "pusher-js"
+import { auth, signOut } from "../utils/firebaseSetup"
+
 
 
 function Chat() {
@@ -21,9 +23,16 @@ function Chat() {
     const [roomName, setRoomName] = useState()
     const [messages, setMessages] = useState([])
     const [{ user }] = useStateValue()
-    // const [rooms, setRooms] = useState([])
 
+    const signOutSession = () => {
+        signOut(auth)
+            .then(result => {
+                document.location.href = "/";
+            }
 
+            )
+            .catch(err => alert(err.message))
+    }
 
     useEffect(() => {
         const pusher = new Pusher('03dd74eaefa15e1b25a8', {
@@ -80,7 +89,7 @@ function Chat() {
             setInput("")
         }
     }
-   
+
     return (
         <div className='chat'>
             <div className="chat_header">
@@ -105,11 +114,11 @@ function Chat() {
                             type="file"
                         />
                         <label htmlFor="raised-button-file"> */}
-                            <AttachFileIcon />
+                        <AttachFileIcon />
                         {/* </label> */}
                     </IconButton>
                     <IconButton>
-                        <MoreVertIcon />
+                        <LogoutIcon onClick={signOutSession} />
                     </IconButton>
                 </div>
             </div>
