@@ -2,10 +2,6 @@ import './App.css';
 import Sidebar from './components/Sidebar'
 import Chat from './components/Chat'
 import React, { useEffect, useState } from 'react';
-import Box from '@mui/material/Box';
-
-import Pusher from 'pusher-js'
-import axios from "./utils/axios"
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,29 +9,44 @@ import {
 } from "react-router-dom";
 import Login from './components/Login'
 import { useStateValue } from "./context/StateProvider"
+import { auth, onAuthStateChanged } from "./utils/firebaseSetup"
 import { actionTypes } from './context/reducer'
+
+
+
 
 function App() {
   // const [messages, setMessages] = useState([])
-  // const [user, setUser] = useState("")
+  const [loggedin, setLoggedin] = useState(false)
   const [{ user }, dispatch] = useStateValue()
 
-  // useEffect(() => {
-  //   console.log(JSON.stringify(localStorage.getItem("user"), null, 5 ))
-  //   if (localStorage.getItem("user")) {
-  //     dispatch({
-  //       type: actionTypes.SET_USER,
-  //       user: localStorage.getItem("user")
-  //     })
-  //   }
-  // }, [])
+  useEffect(() => {
+    // console.log(JSON.stringify(localStorage.getItem("user"), null, 5 ))
+    // if (localStorage.getItem("user")) {
+    //   dispatch({
+    //     type: actionTypes.SET_USER,
+    //     user: localStorage.getItem("user")
+    //   })
+    // }
+
+    onAuthStateChanged(auth, user => {
+      console.log(user)
+      if (user) {
+        dispatch({
+          type: actionTypes.SET_USER,
+          user: user
+        })
+        setLoggedin(true)
+      }
+    })
+  }, [])
 
 
 
 
   return (
     <div className="app">
-      {!user ?
+      {!loggedin ?
         <Login />
         :
 
