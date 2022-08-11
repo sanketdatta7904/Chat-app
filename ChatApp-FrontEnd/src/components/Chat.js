@@ -44,12 +44,13 @@ function Chat() {
             const newMessage = newRoom.messages
             if (newMessage && Object.keys(newMessage).length !== 0) {
                 setMessages([...messages, newMessage])
+                
             }
+            
         });
         return () => {
             channel.unbind_all()
-            channel.unsubscribe()
-            channel.cancelSubscription()
+            channel.unsubscribe("rooms")
         }
     }, [messages])
 
@@ -100,9 +101,6 @@ function Chat() {
                     </p>
                 </div>
                 <div className="chat_headerRight">
-                    <IconButton>
-                        <SearchOutlinedIcon />
-                    </IconButton>
                     <IconButton>
                         {/* <input
                             accept="image/*"

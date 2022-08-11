@@ -43,11 +43,16 @@
     color:gray;
     padding:10px;
 }
-.sidebar_searchContainer > input{
+
+.sidebar_searchContainer > form > input{
     border: none;
     outline-width: 0;
     margin-left: 10px;
 }
+.sidebar_searchContainer> form > button{
+    display: none;
+}
+
 
 .sidebar_chats{
     flex: 1;

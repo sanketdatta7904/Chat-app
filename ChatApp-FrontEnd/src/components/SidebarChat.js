@@ -38,12 +38,13 @@ function SidebarChat({ id, name, addNewChat }) {
             const newMessage = newRoom.messages
             if(newMessage && newRoom._id == id){
                 setMessages(newMessage.message)
+                
             }
+            
         });
         return () => {
             channel.unbind_all()
-            channel.unsubscribe()
-            channel.cancelSubscription()
+            channel.unsubscribe("rooms")
         }
     }, [])
 
