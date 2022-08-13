@@ -21,16 +21,7 @@ function App() {
   const [{ user }, dispatch] = useStateValue()
 
   useEffect(() => {
-    // console.log(JSON.stringify(localStorage.getItem("user"), null, 5 ))
-    // if (localStorage.getItem("user")) {
-    //   dispatch({
-    //     type: actionTypes.SET_USER,
-    //     user: localStorage.getItem("user")
-    //   })
-    // }
-
     onAuthStateChanged(auth, user => {
-      console.log(user)
       if (user) {
         dispatch({
           type: actionTypes.SET_USER,

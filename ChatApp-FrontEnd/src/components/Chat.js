@@ -11,8 +11,13 @@ import { useStateValue } from "../context/StateProvider";
 import LogoutIcon from '@mui/icons-material/Logout';
 import moment from "moment";
 import Pusher from "pusher-js"
-import { auth, signOut } from "../utils/firebaseSetup"
-
+import { auth, signOut, storage, ref, uploadBytesResumable, getDownloadURL } from "../utils/firebaseSetup"
+import { actionTypes } from '../context/reducer'
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 
 
 function Chat() {
@@ -23,7 +28,55 @@ function Chat() {
     const [roomName, setRoomName] = useState()
     const [messages, setMessages] = useState([])
     const [{ user }] = useStateValue()
+    const [{ newMessage }, dispatch] = useStateValue()
+    const [progress, setProgress] = useState(0)
+    const [image, setImage] = useState("")
 
+
+    const handleUpload = async () => {
+        const storageRef = ref(storage, `images/${image.name}`)
+        const uploadTask = uploadBytesResumable(storageRef, image);
+        uploadTask.on(
+            'state_changed',
+            (snapshot) => {
+                const progress = Math.round(
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                )
+                setProgress(progress)
+            },
+            (err) => {
+                console.log(err)
+                alert(err.message)
+
+            },
+            () => {
+                getDownloadURL(uploadTask.snapshot.ref)
+                    .then(async url => {
+                        if (roomId) {
+                            // console.log(user.displayName)
+                            let endPoint = "/rooms/" + roomId + "/newMessage"
+                            // console.log(endPoint)
+                            // console.log(moment().utcOffset('UTC'))
+                            await axios.post(endPoint, {
+                                name: user.displayName,
+                                message: url,
+                                timestamp: moment().utcOffset('UTC'),
+                                messageType: "image"
+                            })
+                            setProgress(0)
+                            setImage("")
+                        }
+                    })
+            }
+        )
+
+    }
+    const handleChange = (e) => {
+        if (e.target.files[0]) {
+            setImage(e.target.files[0])
+            console.log(e.target.files[0])
+        }
+    }
     const signOutSession = async () => {
         await signOut(auth)
             .then(result => {
@@ -40,17 +93,27 @@ function Chat() {
         });
 
         const channel = pusher.subscribe('rooms');
-        channel.bind('inserted', function (newRoom) {
+        channel.bind('updated', function (newRoom) {
             const newMessage = newRoom.messages
             if (newMessage && Object.keys(newMessage).length !== 0) {
                 setMessages([...messages, newMessage])
-                
+                dispatch({
+                    type: actionTypes.NEW_MESSAGE,
+                    newMessage: {
+                        message: roomId + "=" + newMessage.message,
+                        name: newMessage.name,
+                        messageType: newMessage.messageType,
+                        timestamp: newMessage.timestamp
+                    }
+                }
+                )
+
             }
-            
+
         });
         return () => {
-            channel.unbind_all()
-            channel.unsubscribe("rooms")
+            pusher.unbind_all()
+            pusher.unsubscribe("rooms")
         }
     }, [messages])
 
@@ -85,6 +148,7 @@ function Chat() {
                 name: user.displayName,
                 message: input,
                 timestamp: moment().utcOffset('UTC'),
+                messageType: "text"
             })
             setInput("")
         }
@@ -101,21 +165,28 @@ function Chat() {
                     </p>
                 </div>
                 <div className="chat_headerRight">
-                    <IconButton>
-                        {/* <input
+                    <IconButton >
+                        <input
                             accept="image/*"
                             className="input-image"
                             style={{ display: 'none' }}
                             id="raised-button-file"
-                            onChange={sendImage}
+                            onChange={handleChange}
                             type="file"
                         />
-                        <label htmlFor="raised-button-file"> */}
-                        <AttachFileIcon />
-                        {/* </label> */}
+                        <label htmlFor="raised-button-file">
+                            <AttachFileIcon />
+                        </label>
                     </IconButton>
+                    <Button
+                        variant="contained"
+                        component="label"
+                        onClick={handleUpload}
+                    >
+                        {image ? image.name : "upload image"}
+                    </Button>
                     <IconButton onClick={signOutSession}>
-                        <LogoutIcon  />
+                        <LogoutIcon />
                     </IconButton>
                 </div>
             </div>
@@ -123,18 +194,45 @@ function Chat() {
                 {/* {console.log(user.displayName, ">", JSON.stringify(messages, null, 5))} */}
 
                 {messages?.map((message, i) => {
-                    return (
-                        <p key={message + JSON.stringify(Math.random() * 100)} className={`chat_message ${message.name === user.displayName && "chat_receiver"}`}>
-                            <span className="chat_name">
-                                {message.name}
-                            </span>
-                            {message.message}
-                            <span className="chat_timestamp">
-                                {moment(message?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
-                            </span>
+                    if (message.messageType === "text") {
+                        return (
+                            <p key={message + JSON.stringify(Math.random() * 100)} className={`chat_message ${message.name === user.displayName && "chat_receiver"}`}>
+                                <span className="chat_name">
+                                    {message.name}
+                                </span>
+                                {message.message}
+                                <span className="chat_timestamp">
+                                    {moment(message?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
+                                </span>
 
-                        </p>
-                    )
+                            </p>
+                        )
+                    } else {
+                        return (
+                            <div key={message.message + JSON.stringify(Math.random() * 100)} className={`chat_message ${message.name === user.displayName && "chat_receiver"}`}>
+                                <span className="chat_name">
+                                    {message.name}
+                                </span>
+                                <Card sx={{ maxWidth: 345 }} className="chat_image">
+                                    <CardMedia
+                                        component="img"
+                                        height="194"
+                                        image={message.message}
+                                        alt="Paella dish"
+                                    />
+                                    <CardContent>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {moment(message?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
+                                        </Typography>
+                                    </CardContent>
+
+
+                                </Card>
+                            </div>
+
+                        )
+                    }
+
 
 
                 })}

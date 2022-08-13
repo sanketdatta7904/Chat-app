@@ -2,7 +2,8 @@
 import { initializeApp } from "firebase/app";
 
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
-
+import { getFirestore } from 'firebase/firestore'
+import {getStorage, ref, uploadBytesResumable, getDownloadURL} from 'firebase/storage'
 const firebaseConfig = {
   apiKey: "AIzaSyAchyB8o6aYRd52_AcwnNmscl5oaRoCz3Y",
   authDomain: "whatsapp-clone-116d2.firebaseapp.com",
@@ -16,6 +17,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth()
 const provider = new GoogleAuthProvider()
+const storage = getStorage(app)
 
 
-export { auth, provider, signInWithPopup, onAuthStateChanged, signOut }
+
+export { auth, provider,storage,ref, signInWithPopup, onAuthStateChanged, signOut, uploadBytesResumable, getDownloadURL }

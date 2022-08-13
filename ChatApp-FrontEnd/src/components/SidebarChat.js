@@ -4,13 +4,13 @@ import "../assets/SidebarChat.css"
 import axios from '../utils/axios'
 import { Link } from 'react-router-dom'
 import { useStateValue } from "../context/StateProvider"
-import Pusher from "pusher-js"
-
+import ImageIcon from '@mui/icons-material/Image';
 
 
 function SidebarChat({ id, name, addNewChat }) {
     const [seed, setSeed] = useState("")
-    const [messages, setMessages] = useState("")
+    const [message, setMessage] = useState({})
+    const [{ newMessage }] = useStateValue()
 
     useEffect(() => {
         setSeed(Math.floor(Math.random() * 5000))
@@ -21,32 +21,22 @@ function SidebarChat({ id, name, addNewChat }) {
             let endPoint = '/rooms/' + id + '/lastMessage'
             axios.get(endPoint)
                 .then(message => {
-                    setMessages([message.data])
+                    setMessage(message.data)
+
                 })
 
         }
     }, [id])
-    
+
     useEffect(() => {
-        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-            cluster: 'ap2'
-        });
-
-        const channel = pusher.subscribe('rooms');
-        channel.bind('inserted', function (newRoom) {
-
-            const newMessage = newRoom.messages
-            if(newMessage && newRoom._id == id){
-                setMessages(newMessage.message)
-                
+        if(newMessage){
+            if (newMessage.message.split("=")[0] === id) {
+                newMessage.message = newMessage.message?.split("=")[1]
+                setMessage(newMessage)
             }
-            
-        });
-        return () => {
-            channel.unbind_all()
-            channel.unsubscribe("rooms")
         }
-    }, [])
+        
+    }, [newMessage])
 
 
     const createChat = async () => {
@@ -63,7 +53,7 @@ function SidebarChat({ id, name, addNewChat }) {
                 <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
                 <div className="sidebarChat_info">
                     <h2>{name}</h2>
-                    <p>{messages}</p>
+                    {message?.messageType === "text"?<p>{message.name} : {message.message} </p>:(message?.messageType === "image"?<p>{message.name} : <ImageIcon/> Photo </p>: <p></p>) }
                 </div>
             </div>
         </Link>
