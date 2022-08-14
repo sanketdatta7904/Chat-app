@@ -18,6 +18,9 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import Modal from "react-modal"
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
 
 
 function Chat() {
@@ -31,9 +34,14 @@ function Chat() {
     const [{ newMessage }, dispatch] = useStateValue()
     const [progress, setProgress] = useState(0)
     const [image, setImage] = useState("")
-
+    const [modalIsOpen, setModalIsOpen] = useState(false)
+    const [uploadFinished, setUploadFinished] = useState(false)
 
     const handleUpload = async () => {
+        if (!image) {
+            return ("No image selected")
+        }
+        console.log("i am in handle upload")
         const storageRef = ref(storage, `images/${image.name}`)
         const uploadTask = uploadBytesResumable(storageRef, image);
         uploadTask.on(
@@ -47,11 +55,13 @@ function Chat() {
             (err) => {
                 console.log(err)
                 alert(err.message)
-
+                setProgress(0)
+                setImage("")
             },
             () => {
                 getDownloadURL(uploadTask.snapshot.ref)
                     .then(async url => {
+                        setUploadFinished(true)
                         if (roomId) {
                             // console.log(user.displayName)
                             let endPoint = "/rooms/" + roomId + "/newMessage"
@@ -72,7 +82,11 @@ function Chat() {
 
     }
     const handleChange = (e) => {
+        console.log("i am in handle change")
+
+
         if (e.target.files[0]) {
+            setUploadFinished(false)
             setImage(e.target.files[0])
             console.log(e.target.files[0])
         }
@@ -87,37 +101,39 @@ function Chat() {
             .catch(err => alert(err.message))
     }
 
+    // useEffect(() => {
+    //     const pusher = new Pusher('03dd74eaefa15e1b25a8', {
+    //         cluster: 'ap2'
+    //     });
+
+    //     const channel = pusher.subscribe('rooms');
+    //     channel.bind('updated', function (newRoom) {
+    //         const newMessage = newRoom.messages
+    //         if (newMessage && Object.keys(newMessage).length !== 0) {
+    //             setMessages([...messages, newMessage])
+    //             dispatch({
+    //                 type: actionTypes.NEW_MESSAGE,
+    //                 newMessage: {
+    //                     message: roomId + "=" + newMessage.message,
+    //                     name: newMessage.name,
+    //                     messageType: newMessage.messageType,
+    //                     timestamp: newMessage.timestamp
+    //                 }
+    //             }
+    //             )
+
+    //         }
+
+    //     });
+    //     return () => {
+    //         pusher.unbind_all()
+    //         pusher.unsubscribe("rooms")
+    //     }
+    // }, [messages])
+
     useEffect(() => {
-        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-            cluster: 'ap2'
-        });
+        console.log("i am in useeffect id details fetch")
 
-        const channel = pusher.subscribe('rooms');
-        channel.bind('updated', function (newRoom) {
-            const newMessage = newRoom.messages
-            if (newMessage && Object.keys(newMessage).length !== 0) {
-                setMessages([...messages, newMessage])
-                dispatch({
-                    type: actionTypes.NEW_MESSAGE,
-                    newMessage: {
-                        message: roomId + "=" + newMessage.message,
-                        name: newMessage.name,
-                        messageType: newMessage.messageType,
-                        timestamp: newMessage.timestamp
-                    }
-                }
-                )
-
-            }
-
-        });
-        return () => {
-            pusher.unbind_all()
-            pusher.unsubscribe("rooms")
-        }
-    }, [messages])
-
-    useEffect(() => {
         if (roomId) {
             let endPoint = "/rooms/" + roomId
             axios.get(endPoint)
@@ -138,6 +154,7 @@ function Chat() {
     }, [])
 
     const sendMessage = async (e) => {
+
         e.preventDefault()
         if (roomId) {
             // console.log(user.displayName)
@@ -153,7 +170,23 @@ function Chat() {
             setInput("")
         }
     }
+    const imageUploadClose = () => {
+        setImage("")
+        setProgress(0)
+        setModalIsOpen(false)
+    }
 
+    const style = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+    };
     return (
         <div className='chat'>
             <div className="chat_header">
@@ -165,26 +198,60 @@ function Chat() {
                     </p>
                 </div>
                 <div className="chat_headerRight">
-                    <IconButton >
-                        <input
-                            accept="image/*"
-                            className="input-image"
-                            style={{ display: 'none' }}
-                            id="raised-button-file"
-                            onChange={handleChange}
-                            type="file"
-                        />
-                        <label htmlFor="raised-button-file">
-                            <AttachFileIcon />
-                        </label>
-                    </IconButton>
                     <Button
                         variant="contained"
                         component="label"
-                        onClick={handleUpload}
+                        onClick={() => setModalIsOpen(true)}
                     >
-                        {image ? image.name : "upload image"}
+                        Send Image
                     </Button>
+
+                    <Modal
+                        isOpen={modalIsOpen}
+                        onClose={imageUploadClose}
+                        aria-labelledby="modal-modal-title"
+                        aria-describedby="modal-modal-description"
+                        ariaHideApp={false}
+                    >
+                        <Box sx={style}>
+                            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                                Please Upload an Image
+                            </Typography>
+                            <LinearProgress variant="determinate" value={progress} />
+                            <IconButton >
+                                <input
+                                    accept="image/*"
+                                    className="input-image"
+                                    style={{ display: 'none' }}
+                                    id="raised-button-file"
+                                    onChange={handleChange}
+                                    type="file"
+                                />
+                                <label htmlFor="raised-button-file">
+                                    <AttachFileIcon />
+                                </label>
+                            </IconButton>
+                            <Typography id="modal-modal-title" variant="h6" component="h2">
+                                {image ? image.name : ""}
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                component="label"
+                                onClick={handleUpload}
+                                disabled={image ? false : true}
+                            >
+                                Upload
+                            </Button>
+                            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                                {uploadFinished ? "Upload finished Successfully" : ""}
+                            </Typography>
+                            <div>
+                                <button onClick={imageUploadClose}>Close</button>
+                            </div>
+                        </Box>
+                    </Modal>
+
+
                     <IconButton onClick={signOutSession}>
                         <LogoutIcon />
                     </IconButton>
