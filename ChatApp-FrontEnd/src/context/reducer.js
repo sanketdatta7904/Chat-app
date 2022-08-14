@@ -5,12 +5,14 @@ export const initialState = {
         name: "",
         messageType: "",
         timestamp: ""
-    }
+    },
+    icon: "https://avatars.dicebear.com/api/human/$%7Bseed%7D.svg"
 }
 
 export const actionTypes = {
     SET_USER: "SET_USER",
-    NEW_MESSAGE: "NEW_MESSAGE"
+    NEW_MESSAGE: "NEW_MESSAGE",
+    SET_ICON: "SET_ICON"
 }
 
 const reducer = (state, action) => {
@@ -24,6 +26,11 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 newMessage: action.newMessage
+            }
+        case actionTypes.SET_ICON:
+            return {
+                ...state,
+                icon: action.icon
             }
         default:
             return state

@@ -29,38 +29,38 @@ function Sidebar() {
                 ))
             })
     }, [])
-    // useEffect(() => {
-    //     const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-    //         cluster: 'ap2'
-    //     });
-
-    //     const channel = pusher.subscribe('rooms');
-    //     channel.bind('inserted', function (newRoom) {
-    //         if (newRoom.mongoEvent === "create") {
-    //             setRooms([...rooms, newRoom])
-
-    //         }
-            
-    //     });
-    //     return () => {
-    //         pusher.unbind_all()
-    //         pusher.unsubscribe("rooms")
-    //         pusher.unbind_global()
-
-    //     }
-    // }, [rooms])
-
-    useEffect(() => { //MAnually unsubscribe
+    useEffect(() => {
         const pusher = new Pusher('03dd74eaefa15e1b25a8', {
             cluster: 'ap2'
         });
-        
+
+        const channel = pusher.subscribe('rooms');
+        channel.bind('inserted', function (newRoom) {
+            if (newRoom.mongoEvent === "create") {
+                setRooms([...rooms, newRoom])
+
+            }
+            
+        });
         return () => {
             pusher.unbind_all()
             pusher.unsubscribe("rooms")
+            pusher.unbind_global()
 
         }
-    })
+    }, [rooms])
+
+    // useEffect(() => { //MAnually unsubscribe
+    //     const pusher = new Pusher('03dd74eaefa15e1b25a8', {
+    //         cluster: 'ap2'
+    //     });
+        
+    //     return () => {
+    //         pusher.unbind_all()
+    //         pusher.unsubscribe("rooms")
+
+    //     }
+    // })
 
 
     const searchRoom = (e) => {

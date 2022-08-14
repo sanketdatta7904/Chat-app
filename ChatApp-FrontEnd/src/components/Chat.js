@@ -21,6 +21,7 @@ import Button from '@mui/material/Button';
 import Modal from "react-modal"
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
+import Picker from 'emoji-picker-react';
 
 
 function Chat() {
@@ -31,17 +32,22 @@ function Chat() {
     const [roomName, setRoomName] = useState()
     const [messages, setMessages] = useState([])
     const [{ user }] = useStateValue()
+    const [{ icon }] = useStateValue()
     const [{ newMessage }, dispatch] = useStateValue()
+
     const [progress, setProgress] = useState(0)
     const [image, setImage] = useState("")
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [uploadFinished, setUploadFinished] = useState(false)
+    const [chosenEmoji, setChosenEmoji] = useState(null);
+    const [emoiOpen, setEmojiOpen] = useState(false)
+
+
 
     const handleUpload = async () => {
         if (!image) {
             return ("No image selected")
         }
-        console.log("i am in handle upload")
         const storageRef = ref(storage, `images/${image.name}`)
         const uploadTask = uploadBytesResumable(storageRef, image);
         uploadTask.on(
@@ -63,10 +69,7 @@ function Chat() {
                     .then(async url => {
                         setUploadFinished(true)
                         if (roomId) {
-                            // console.log(user.displayName)
                             let endPoint = "/rooms/" + roomId + "/newMessage"
-                            // console.log(endPoint)
-                            // console.log(moment().utcOffset('UTC'))
                             await axios.post(endPoint, {
                                 name: user.displayName,
                                 message: url,
@@ -81,14 +84,18 @@ function Chat() {
         )
 
     }
+
+    const onEmojiClick = (event, emojiObject) => {
+        setChosenEmoji(emojiObject);
+        setInput(input + emojiObject.emoji)
+    };
+
     const handleChange = (e) => {
-        console.log("i am in handle change")
 
 
         if (e.target.files[0]) {
             setUploadFinished(false)
             setImage(e.target.files[0])
-            console.log(e.target.files[0])
         }
     }
     const signOutSession = async () => {
@@ -101,44 +108,42 @@ function Chat() {
             .catch(err => alert(err.message))
     }
 
-    // useEffect(() => {
-    //     const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-    //         cluster: 'ap2'
-    //     });
+    useEffect(() => {
+        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
+            cluster: 'ap2'
+        });
 
-    //     const channel = pusher.subscribe('rooms');
-    //     channel.bind('updated', function (newRoom) {
-    //         const newMessage = newRoom.messages
-    //         if (newMessage && Object.keys(newMessage).length !== 0) {
-    //             setMessages([...messages, newMessage])
-    //             dispatch({
-    //                 type: actionTypes.NEW_MESSAGE,
-    //                 newMessage: {
-    //                     message: roomId + "=" + newMessage.message,
-    //                     name: newMessage.name,
-    //                     messageType: newMessage.messageType,
-    //                     timestamp: newMessage.timestamp
-    //                 }
-    //             }
-    //             )
+        const channel = pusher.subscribe('rooms');
+        channel.bind('updated', function (newRoom) {
+            const newMessage = newRoom.messages
+            if (newMessage && Object.keys(newMessage).length !== 0) {
+                setMessages([...messages, newMessage])
+                dispatch({
+                    type: actionTypes.NEW_MESSAGE,
+                    newMessage: {
+                        message: roomId + "=" + newMessage.message,
+                        name: newMessage.name,
+                        messageType: newMessage.messageType,
+                        timestamp: newMessage.timestamp
+                    }
+                }
+                )
 
-    //         }
+            }
 
-    //     });
-    //     return () => {
-    //         pusher.unbind_all()
-    //         pusher.unsubscribe("rooms")
-    //     }
-    // }, [messages])
+        });
+        return () => {
+            pusher.unbind_all()
+            pusher.unsubscribe("rooms")
+        }
+    }, [messages])
 
     useEffect(() => {
-        console.log("i am in useeffect id details fetch")
 
         if (roomId) {
             let endPoint = "/rooms/" + roomId
             axios.get(endPoint)
                 .then(response => {
-                    // console.log(response.data)
                     setRoomName(response.data.name)
                     setMessages(response.data.messages)
                     return
@@ -148,19 +153,12 @@ function Chat() {
         }
     }, [roomId])
 
-    useEffect(() => {
-        setSeed(Math.floor(Math.random() * 500))
-
-    }, [])
 
     const sendMessage = async (e) => {
 
         e.preventDefault()
         if (roomId) {
-            // console.log(user.displayName)
             let endPoint = "/rooms/" + roomId + "/newMessage"
-            // console.log(endPoint)
-            // console.log(moment().utcOffset('UTC'))
             await axios.post(endPoint, {
                 name: user.displayName,
                 message: input,
@@ -182,7 +180,7 @@ function Chat() {
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: 400,
-        bgcolor: 'background.paper',
+        bgcolor: 'transparent',
         border: '2px solid #000',
         boxShadow: 24,
         p: 4,
@@ -190,7 +188,7 @@ function Chat() {
     return (
         <div className='chat'>
             <div className="chat_header">
-                <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
+                <Avatar src={icon?.split("=")[1]} />
                 <div className="chat_headerInfo">
                     <h3>{roomName}</h3>
                     <p>{"last active at "}
@@ -258,7 +256,6 @@ function Chat() {
                 </div>
             </div>
             <div className="chat_body">
-                {/* {console.log(user.displayName, ">", JSON.stringify(messages, null, 5))} */}
 
                 {messages?.map((message, i) => {
                     if (message.messageType === "text") {
@@ -305,7 +302,30 @@ function Chat() {
                 })}
             </div>
             <div className="chat_footer">
-                <InsertEmoticonIcon />
+
+                <InsertEmoticonIcon onClick={() => setEmojiOpen(true)} />
+                <Modal
+                    isOpen={emoiOpen}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                    ariaHideApp={false}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <Box sx={style}>
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                            Text in a modal
+                        </Typography>
+                        {chosenEmoji ? (
+                            <span>You chose: {chosenEmoji.emoji}</span>
+                        ) : (
+                            <span>No emoji Chosen</span>
+                        )}
+                        <Picker onEmojiClick={onEmojiClick} />
+                        <button onClick={() => setEmojiOpen(false)}>close</button>
+                    </Box>
+                    
+                </Modal>
                 <form action="">
                     <input value={input} onChange={e => setInput(e.target.value)} placeholder="type a message" type="text" />
                     <button onClick={sendMessage} type="submit">Send a message</button>
