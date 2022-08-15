@@ -1,31 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import '../assets/chat.css'
 import { Avatar, IconButton } from "@mui/material"
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
-import MicIcon from '@mui/icons-material/Mic';
 import axios from '../utils/axios';
 import { useParams } from 'react-router-dom';
 import { useStateValue } from "../context/StateProvider";
-import LogoutIcon from '@mui/icons-material/Logout';
 import moment from "moment";
-import Pusher from "pusher-js"
-import { auth, signOut, storage, ref, uploadBytesResumable, getDownloadURL } from "../utils/firebaseSetup"
-import { actionTypes } from '../context/reducer'
+import {storage, ref, uploadBytesResumable, getDownloadURL } from "../utils/firebaseSetup"
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import Modal from "react-modal"
+import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
 import Picker from 'emoji-picker-react';
+import Tooltip from '@mui/material/Tooltip';
+import Pusher from "pusher-js"
+import {actionTypes} from "../context/reducer"
+import appConfig from '../config/config';
 
 
 function Chat() {
-    const [seed, setSeed] = useState("")
     const [input, setInput] = useState('')
 
     const { roomId } = useParams()
@@ -33,14 +31,14 @@ function Chat() {
     const [messages, setMessages] = useState([])
     const [{ user }] = useStateValue()
     const [{ icon }] = useStateValue()
-    const [{ newMessage }, dispatch] = useStateValue()
+    const [{  }, dispatch] = useStateValue()
 
     const [progress, setProgress] = useState(0)
     const [image, setImage] = useState("")
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [uploadFinished, setUploadFinished] = useState(false)
     const [chosenEmoji, setChosenEmoji] = useState(null);
-    const [emoiOpen, setEmojiOpen] = useState(false)
+    const [emojiOpen, setEmojiOpen] = useState(false)
 
 
 
@@ -91,26 +89,21 @@ function Chat() {
     };
 
     const handleChange = (e) => {
-
-
-        if (e.target.files[0]) {
-            setUploadFinished(false)
-            setImage(e.target.files[0])
+        if (e.target.files[0] ) {
+            if(e.target.files[0].type.includes("image") && (e.target.files[0].size)/1024 <=1026){
+                setUploadFinished(false)
+                setImage(e.target.files[0])
+            }else{
+                alert("Please select image file of 1MB size only")
+            }
+           
         }
     }
-    const signOutSession = async () => {
-        await signOut(auth)
-            .then(result => {
-                document.location.href = "/";
-            }
-
-            )
-            .catch(err => alert(err.message))
-    }
+  
 
     useEffect(() => {
-        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-            cluster: 'ap2'
+        const pusher = new Pusher(appConfig.pusherConfig.apIKey, {
+            cluster: appConfig.pusherConfig.cluster
         });
 
         const channel = pusher.subscribe('rooms');
@@ -173,6 +166,13 @@ function Chat() {
         setProgress(0)
         setModalIsOpen(false)
     }
+    const lastMessageTimestamp = (messages) => {
+        if(messages && messages.length === 0){
+            return moment().format('MMMM Do YYYY, h:mm:ss')
+        }else{
+            return  moment(messages[messages.length - 1]?.timestamp).format('MMMM Do YYYY, h:mm:ss')
+        }
+    }
 
     const style = {
         position: 'absolute',
@@ -180,7 +180,7 @@ function Chat() {
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: 400,
-        bgcolor: 'transparent',
+        bgcolor: 'background.paper',
         border: '2px solid #000',
         boxShadow: 24,
         p: 4,
@@ -192,7 +192,7 @@ function Chat() {
                 <div className="chat_headerInfo">
                     <h3>{roomName}</h3>
                     <p>{"last active at "}
-                        {moment(messages[messages.length - 1]?.timestamp).format('MMMM Do YYYY, h:mm:ss')}
+                        {lastMessageTimestamp(messages)}
                     </p>
                 </div>
                 <div className="chat_headerRight">
@@ -205,11 +205,10 @@ function Chat() {
                     </Button>
 
                     <Modal
-                        isOpen={modalIsOpen}
+                        open={modalIsOpen}
                         onClose={imageUploadClose}
                         aria-labelledby="modal-modal-title"
                         aria-describedby="modal-modal-description"
-                        ariaHideApp={false}
                     >
                         <Box sx={style}>
                             <Typography id="modal-modal-description" sx={{ mt: 2 }}>
@@ -236,7 +235,7 @@ function Chat() {
                                 variant="contained"
                                 component="label"
                                 onClick={handleUpload}
-                                disabled={image ? false : true}
+                                disabled={image && (progress=== 0) ? false : true}
                             >
                                 Upload
                             </Button>
@@ -250,9 +249,6 @@ function Chat() {
                     </Modal>
 
 
-                    <IconButton onClick={signOutSession}>
-                        <LogoutIcon />
-                    </IconButton>
                 </div>
             </div>
             <div className="chat_body">
@@ -302,15 +298,17 @@ function Chat() {
                 })}
             </div>
             <div className="chat_footer">
+            <Tooltip title="Send Emoji">
 
                 <InsertEmoticonIcon onClick={() => setEmojiOpen(true)} />
+                </Tooltip>
+
                 <Modal
-                    isOpen={emoiOpen}
+                    open={emojiOpen}
+                    onClose={() => setEmojiOpen(false)}
                     aria-labelledby="modal-modal-title"
                     aria-describedby="modal-modal-description"
-                    ariaHideApp={false}
-                    animationType="fade"
-                    transparent={true}
+
                 >
                     <Box sx={style}>
                         <Typography id="modal-modal-title" variant="h6" component="h2">
@@ -330,7 +328,6 @@ function Chat() {
                     <input value={input} onChange={e => setInput(e.target.value)} placeholder="type a message" type="text" />
                     <button onClick={sendMessage} type="submit">Send a message</button>
                 </form>
-                <MicIcon />
             </div>
         </div>
     )

@@ -7,8 +7,8 @@ import { useStateValue } from "../context/StateProvider"
 import ImageIcon from '@mui/icons-material/Image';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
 import { actionTypes } from '../context/reducer'
+import Tooltip from '@mui/material/Tooltip';
 
 
 
@@ -16,7 +16,7 @@ function SidebarChat({ id, name, addNewChat }) {
     const [seed, setSeed] = useState("")
     const [message, setMessage] = useState({})
     const [{ newMessage }] = useStateValue()
-    const [{ icon }, dispatch] = useStateValue()
+    const [ {}, dispatch] = useStateValue()
 
     const navigate = useNavigate();
 
@@ -44,22 +44,14 @@ function SidebarChat({ id, name, addNewChat }) {
             }
         }
 
-    }, [newMessage])
+    }, [newMessage, id])
 
 
-    const createChat = async () => {
-        const roomName = prompt("Please enter name for chat");
-        if (roomName) {
-            await axios.post("/rooms/new", {
-                name: roomName
-            })
-        }
-    }
 
     const deleteRoom = async () => {
         if (id) {
             let endPoint = '/rooms/' + id
-            axios.delete(endPoint)
+            await axios.delete(endPoint)
                 .then(() => {
                     navigate(`/`);
                 })
@@ -69,10 +61,10 @@ function SidebarChat({ id, name, addNewChat }) {
     const changeIcon = () => {
         dispatch({
             type: actionTypes.SET_ICON,
-            icon: id+ "="+`https://avatars.dicebear.com/api/human/${seed}.svg`
+            icon: `${id}=https://avatars.dicebear.com/api/human/${seed}.svg`
           })
     }
-    return !addNewChat ? (
+    return (
         <Link to={`/rooms/${id}`} onClick={changeIcon}>
             <div className="sidebarChat">
                 <div className='sidebarChat_left'>
@@ -83,17 +75,14 @@ function SidebarChat({ id, name, addNewChat }) {
 
                     </div>
                 </div>
-
+                <Tooltip title="Delete Room">
                 <IconButton variant="contained" onClick={deleteRoom}>
                     <DeleteForeverOutlinedIcon  color="success" />
                 </IconButton>
+                </Tooltip>
             </div>
         </Link>
-    ) : (
-        <div onClick={createChat} className="sidebarChat">
-            <h2>Add new Chat</h2>
-        </div>
-    )
+    ) 
 }
 
 export default SidebarChat

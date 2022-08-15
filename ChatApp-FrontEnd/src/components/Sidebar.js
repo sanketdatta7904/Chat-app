@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import '../assets/sidebar.css'
-import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import { Avatar, IconButton } from "@mui/material"
 import ChatIcon from '@mui/icons-material/Chat';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import SidebarChat from "./SidebarChat"
 import axios from '../utils/axios';
 import Pusher from "pusher-js"
-import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
 import { useStateValue } from "../context/StateProvider"
+import LogoutIcon from '@mui/icons-material/Logout';
+import { auth, signOut } from "../utils/firebaseSetup"
+import { isEmpty } from 'underscore';
+import Tooltip from '@mui/material/Tooltip';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Modal from '@mui/material/Modal';
+import appConfig from '../config/config';
 
 function Sidebar() {
     const [rooms, setRooms] = useState([])
-    const [{ user }, dispatch] = useStateValue()
+    const [{ user }] = useStateValue()
     const [input, setInput] = useState('')
-    const [searched, setSearched] = useState(false)
+    const [newChat, setNewChat] = useState(false)
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,8 +35,8 @@ function Sidebar() {
             })
     }, [])
     useEffect(() => {
-        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-            cluster: 'ap2'
+        const pusher = new Pusher(appConfig.pusherConfig.apIKey, {
+            cluster: appConfig.pusherConfig.cluster
         });
 
         const channel = pusher.subscribe('rooms');
@@ -40,7 +45,12 @@ function Sidebar() {
                 setRooms([...rooms, newRoom])
 
             }
-            
+
+        });
+        channel.bind('deleted', function (newRoom) {
+            const filteredRooms = rooms.filter((room) => room._id !== newRoom._id)
+            setRooms(filteredRooms)
+
         });
         return () => {
             pusher.unbind_all()
@@ -49,18 +59,28 @@ function Sidebar() {
 
         }
     }, [rooms])
+    const signOutSession = async () => {
+        await signOut(auth)
+            .then(result => {
+                document.location.href = "/";
+            }
 
-    // useEffect(() => { //MAnually unsubscribe
-    //     const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-    //         cluster: 'ap2'
-    //     });
-        
-    //     return () => {
-    //         pusher.unbind_all()
-    //         pusher.unsubscribe("rooms")
+            )
+            .catch(err => alert(err.message))
+    }
 
-    //     }
-    // })
+
+    useEffect(() => { //MAnually unsubscribe
+        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
+            cluster: 'ap2'
+        });
+
+        return () => {
+            pusher.unbind_all()
+            pusher.unsubscribe("rooms")
+
+        }
+    })
 
 
     const searchRoom = (e) => {
@@ -72,21 +92,65 @@ function Sidebar() {
         }
         setInput("")
     }
+    const createChat = async (e) => {
+        e.preventDefault()
+        if (!isEmpty(newChatName.trim())) {
+            await axios.post("/rooms/new", {
+                name: newChatName
+            })
+            setNewChatName("")
+        } else {
+            alert("Please enter a name")
+        }
+    }
 
+    const style = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+    };
+
+    const [newChatName, setNewChatName] = useState("")
     return (
         <div className='sidebar'>
             <div className='sidebar_header'>
-                <Avatar src={user?.photoURL} />
+                <Avatar src={user?.photoURL} alt={user?.displayName}/>
                 <div className='sidebar_headerRight'>
-                    <IconButton>
-                        <DonutLargeIcon />
-                    </IconButton>
-                    <IconButton>
-                        <ChatIcon />
-                    </IconButton>
-                    <IconButton>
-                        <MoreVertIcon />
-                    </IconButton>
+                    <Modal
+                        open={newChat}
+                        onClose={() => setNewChat(false)}
+                        aria-labelledby="modal-modal-title"
+                        aria-describedby="modal-modal-description"
+                    >
+                        <Box sx={style}>
+                            <Typography id="modal-modal-title" variant="h6" component="h2">
+                                Please Enter the name of the Room
+                            </Typography>
+                            <form action="">
+                                <input value={newChatName} onChange={e => setNewChatName(e.target.value)} placeholder="Enter Name" type="text" />
+                                <button className="new_chat_submit" onClick={createChat} type="submit">Create</button>
+                            </form>
+                        </Box>
+                    </Modal>
+                    <Tooltip title="Create Room">
+                        <IconButton onClick={() => setNewChat(true)}>
+                            <ChatIcon />
+                        </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Sign out">
+
+                        <IconButton onClick={signOutSession}>
+                            <LogoutIcon />
+                        </IconButton>
+                    </Tooltip>
+
                 </div>
             </div>
             <div className='sidebar_search'>
@@ -101,7 +165,6 @@ function Sidebar() {
                 </div>
             </div>
             <div className="sidebar_chats">
-                <SidebarChat addNewChat />
                 {rooms.map((room, index) => (
                     <SidebarChat id={room._id} key={index} name={room.name} />
                 ))}

@@ -16,9 +16,8 @@ import { actionTypes } from './context/reducer'
 
 
 function App() {
-  // const [messages, setMessages] = useState([])
   const [loggedin, setLoggedin] = useState(false)
-  const [{ user }, dispatch] = useStateValue()
+  const [{  }, dispatch] = useStateValue()
 
   useEffect(() => {
     onAuthStateChanged(auth, user => {

@@ -1,7 +1,11 @@
 import axios from 'axios'
+import appConfig from "../config/config"
 
 const instance = axios.create({
-    baseURL: 'http://localhost:9000/api/v1'
+    baseURL: appConfig.backendUrl
 })
 
 export default instance;
+
+
+
