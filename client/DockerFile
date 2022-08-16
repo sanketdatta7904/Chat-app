@@ -1,0 +1,25 @@
+FROM node:16.16.0 AS Production
+
+ENV REACT_APP_FIREBASE_API_KEY="AIzaSyAchyB8o6aYRd52_AcwnNmscl5oaRoCz3Y"
+ENV REACT_APP_FIREBASE_AUTH_DOMAIN="whatsapp-clone-116d2.firebaseapp.com"
+ENV REACT_APP_FIREBASE_PROJECT_ID="whatsapp-clone-116d2"
+ENV REACT_APP_FIREBASE_STORAGE_BUCKET="whatsapp-clone-116d2.appspot.com"
+ENV REACT_APP_FIREBASE_MESSAGING_SENDER_ID="266882169387"
+ENV REACT_APP_FIREBASE_APP_ID="1:266882169387:web:66828398d59e96edcb086e"
+ENV REACT_APP_PUSHER_API_KEY="03dd74eaefa15e1b25a8"
+ENV REACT_APP_PUSHER_CLUSTER="ap2"
+ENV REACT_APP_BACKEND_URL='http://localhost:9000/api/v1'
+
+RUN mkdir -p /usr/src/client
+WORKDIR /usr/src/client
+
+COPY package.json .
+COPY package-lock.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD [ "npm", "start"]
