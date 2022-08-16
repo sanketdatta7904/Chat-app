@@ -4,10 +4,9 @@
 		{
 			"type": "npm",
 			"script": "build-ts",
-			"path": "ChatApp-BackEnd",
 			"group": "build",
 			"problemMatcher": [],
-			"label": "npm: build-ts - ChatApp-BackEnd",
+			"label": "yarn: build-ts",
 			"detail": "tsc"
 		}
 	]

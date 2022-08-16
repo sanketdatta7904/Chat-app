@@ -11,9 +11,9 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\ChatApp-BackEnd\\dist\\server.js",
-            "preLaunchTask": "npm: build-ts",
-            "sourceMaps": true,
+            "program": "${workspaceFolder}/api/dist/server.js",
+            "preLaunchTask": "yarn: build-ts",
+            
         }
     ]
 }
