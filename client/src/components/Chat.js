@@ -78,6 +78,9 @@ function Chat() {
                             setImage("")
                         }
                     })
+                    .catch((err) => {
+                        return err
+                    })
             }
         )
 
@@ -141,8 +144,11 @@ function Chat() {
                     setMessages(response.data.messages)
                     return
 
-                }
-                )
+                })
+                .catch((err) => {
+                    return err
+                })
+                
         }
     }, [roomId])
 
