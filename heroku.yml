@@ -17,8 +17,8 @@ setup:
     REACT_APP_BACKEND_URL: http://localhost:9000/api/v1
 build:
   docker:
+    web: api/DockerFile
     web: client/DockerFile
-    worker: api/DockerFile
   config:
     ARG MONGODB_URL: mongodb+srv://admin:Sanket230597@cluster0.kcvew5q.mongodb.net/?retryWrites=true&w=majority
     ARG PUSHER_APPID: 1444121
