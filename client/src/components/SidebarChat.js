@@ -32,6 +32,10 @@ function SidebarChat({ id, name, addNewChat }) {
                     setMessage(message.data)
 
                 })
+                .catch((err) => {
+                console.log(err)
+                })
+                
 
         }
     }, [id])
@@ -54,6 +58,9 @@ function SidebarChat({ id, name, addNewChat }) {
             await axios.delete(endPoint)
                 .then(() => {
                     navigate(`/`);
+                })
+                .catch((err) => {
+                    console.log(err)
                 })
         }
     }
