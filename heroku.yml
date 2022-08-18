@@ -1,40 +1,7 @@
-setup:
-  config:
-    MONGODB_URL: mongodb+srv://admin:Sanket230597@cluster0.kcvew5q.mongodb.net/?retryWrites=true&w=majority
-    PUSHER_APPID: 1444121
-    PUSHER_KEY: 03dd74eaefa15e1b25a8
-    PUSHER_SECRET: 0ba620fd0fa77562580e
-    PUSHER_CLUSTER: ap2
-    PUSHER_USETLS: true
-    REACT_APP_FIREBASE_API_KEY: AIzaSyAchyB8o6aYRd52_AcwnNmscl5oaRoCz3Y
-    REACT_APP_FIREBASE_AUTH_DOMAIN: whatsapp-clone-116d2.firebaseapp.com
-    REACT_APP_FIREBASE_PROJECT_ID: whatsapp-clone-116d2
-    REACT_APP_FIREBASE_STORAGE_BUCKET: whatsapp-clone-116d2.appspot.com
-    REACT_APP_FIREBASE_MESSAGING_SENDER_ID: 266882169387
-    REACT_APP_FIREBASE_APP_ID: 1:266882169387:web:66828398d59e96edcb086e
-    REACT_APP_PUSHER_API_KEY: 03dd74eaefa15e1b25a8
-    REACT_APP_PUSHER_CLUSTER: ap2
-    REACT_APP_BACKEND_URL: http://localhost:9000/api/v1
 build:
   docker:
-    worker: api/DockerFile
-    web: client/DockerFile
-  config:
-    ARG MONGODB_URL: mongodb+srv://admin:Sanket230597@cluster0.kcvew5q.mongodb.net/?retryWrites=true&w=majority
-    ARG PUSHER_APPID: 1444121
-    ARG PUSHER_KEY: 03dd74eaefa15e1b25a8
-    ARG PUSHER_SECRET: 0ba620fd0fa77562580e
-    ARG PUSHER_CLUSTER: ap2
-    ARG PUSHER_USETLS: true
-    ARG REACT_APP_FIREBASE_API_KEY: AIzaSyAchyB8o6aYRd52_AcwnNmscl5oaRoCz3Y
-    ARG REACT_APP_FIREBASE_AUTH_DOMAIN: whatsapp-clone-116d2.firebaseapp.com
-    ARG REACT_APP_FIREBASE_PROJECT_ID: whatsapp-clone-116d2
-    ARG REACT_APP_FIREBASE_STORAGE_BUCKET: whatsapp-clone-116d2.appspot.com
-    ARG REACT_APP_FIREBASE_MESSAGING_SENDER_ID: 266882169387
-    ARG REACT_APP_FIREBASE_APP_ID: 1:266882169387:web:66828398d59e96edcb086e
-    ARG REACT_APP_PUSHER_API_KEY: 03dd74eaefa15e1b25a8
-    ARG REACT_APP_PUSHER_CLUSTER: ap2
-    ARG REACT_APP_BACKEND_URL: http://localhost:9000/api/v1
+    worker: api/DockerFile.worker
+    web: client/DockerFile.web
 # release:
   # copy resources
   # skip in this example
