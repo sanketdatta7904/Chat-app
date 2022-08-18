@@ -14,7 +14,7 @@
 .sidebar_headerRight{
     display:flex;
     align-items: center;
-    justify-content:space-between;
+    justify-content:flex-end;
     min-width:10vw;
 }
 
@@ -43,11 +43,16 @@
     color:gray;
     padding:10px;
 }
-.sidebar_searchContainer > input{
+
+.sidebar_searchContainer > form > input{
     border: none;
     outline-width: 0;
     margin-left: 10px;
 }
+.sidebar_searchContainer> form > button{
+    display: none;
+}
+
 
 .sidebar_chats{
     flex: 1;
@@ -56,4 +61,6 @@
 }
 
 
-
+.new_chat_submit{
+    display: none;
+}

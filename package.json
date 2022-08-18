@@ -1,0 +1,21 @@
+{
+  "name": "chat-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build-ts": "cd api && yarn run build-ts",
+    "start-api": "cd api && yarn run build-ts && yarn run serve",
+    "start-client": "cd client && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanketdatta7904/Chat-app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sanketdatta7904/Chat-app/issues"
+  },
+  "homepage": "https://github.com/sanketdatta7904/Chat-app#readme"
+}
