@@ -8,7 +8,7 @@ services:
     build:
       context: api
       target: production
-      dockerfile: Dockerfile
+      dockerfile: DockerFile
     ports:
       - 9000:9000
     networks:
@@ -21,7 +21,7 @@ services:
     build:
       context:  client
       target: production
-      dockerfile: Dockerfile
+      dockerfile: DockerFile
     ports:
       - 3000:3000
     networks:
