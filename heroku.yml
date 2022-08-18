@@ -18,7 +18,7 @@ setup:
 build:
   docker:
     web: client/DockerFile
-    web: api/DockerFile
+    worker: api/DockerFile
   config:
     ARG MONGODB_URL: mongodb+srv://admin:Sanket230597@cluster0.kcvew5q.mongodb.net/?retryWrites=true&w=majority
     ARG PUSHER_APPID: 1444121
