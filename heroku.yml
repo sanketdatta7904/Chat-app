@@ -18,7 +18,7 @@ setup:
 build:
   docker:
     web: client/DockerFile
-    web: api/DockerFile
+    worker: api/DockerFile
 # release:
   # copy resources
   # skip in this example
