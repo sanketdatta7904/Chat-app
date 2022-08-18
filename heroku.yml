@@ -18,7 +18,7 @@ setup:
 build:
   docker:
     web: client/DockerFile
-    worker: api/DockerFile
+    web: api/DockerFile
   config:
     ARG MONGODB_URL: mongodb+srv://admin:Sanket230597@cluster0.kcvew5q.mongodb.net/?retryWrites=true&w=majority
     ARG PUSHER_APPID: 1444121
@@ -38,6 +38,3 @@ build:
 # release:
   # copy resources
   # skip in this example
-run:
-  web: npm run start-client
-  worker: npm run start-api
