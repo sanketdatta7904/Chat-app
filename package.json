@@ -6,7 +6,8 @@
   "scripts": {
     "build-ts": "cd api && yarn run build-ts",
     "start-api": "cd api && yarn run build-ts && yarn run serve",
-    "start-client": "cd client && npm start"
+    "start-client": "cd client && npm start",
+    "start": "npm run start-api && npm run start-client"
   },
   "repository": {
     "type": "git",
