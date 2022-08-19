@@ -1,7 +1,6 @@
 build:
   docker:
-    worker: api/DockerFile.worker
-    web: client/DockerFile.web
+    web: Dockerfile
 # release:
   # copy resources
   # skip in this example

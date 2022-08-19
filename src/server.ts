@@ -36,8 +36,8 @@ class Server {
   
   
     private runServer(): void {
-      this.port = this.normalizePort(Server.port || 4000);
-      console.log("server started onnnnnnnnnn",this.port);
+      this.port = this.normalizePort(Server.port || 9000);
+      console.log("server started on",this.port);
       App.set('port', this.port);
       this.createServer();
     }
@@ -47,7 +47,6 @@ class Server {
       this.server.listen(this.port);
       this.server.on('listening', () => {
         const address = this.server.address();
-        console.log("adress>>>>>>", address)
         const bind =
           typeof address === 'string'
             ? `pipe ${address}`
