@@ -1,6 +1,19 @@
+FROM node:16.16.0
+
+RUN mkdir -p /app/client
+WORKDIR /app/client
+
+COPY client/package.json .
+COPY client/package-lock.json .
+
+RUN npm install
+
+COPY client .
+
+RUN npm run build
+
 FROM node:16.16.0 AS Production
 
-RUN mkdir -p /app
 WORKDIR /app
 
 COPY package.json .
