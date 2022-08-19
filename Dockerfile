@@ -1,7 +1,9 @@
 FROM node:16.16.0 AS Production
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+ENV NODE_ENV=production
+
+RUN mkdir -p /app
+WORKDIR /app
 
 COPY package.json .
 COPY yarn.lock .
@@ -12,6 +14,4 @@ COPY . .
  
 RUN yarn run build-ts
 
-EXPOSE 9000
-
-CMD [ "yarn","run", "start"]
+CMD [ "yarn","run","start" ]
