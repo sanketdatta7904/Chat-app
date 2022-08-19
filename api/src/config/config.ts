@@ -3,7 +3,7 @@ dotenv.config()
 
 export const Config = Object.freeze({
   BaseRoute: '/api',
-  Port: process.env.NODE_PORT || 9000,
+  Port: process.env.PORT || 9000,
   mongo: {
     connectionUrl : process.env.MONGODB_URL as string
   },
