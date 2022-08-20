@@ -1,6 +1,5 @@
 FROM node:16.16.0
 
-RUN mkdir -p /app/client
 WORKDIR /app/client
 
 COPY client/package.json .
