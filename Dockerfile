@@ -1,4 +1,5 @@
-FROM node:16.16.0
+
+FROM node:16.16.0 AS Production
 
 ENV REACT_APP_FIREBASE_API_KEY=AIzaSyAchyB8o6aYRd52_AcwnNmscl5oaRoCz3Y
 ENV REACT_APP_FIREBASE_AUTH_DOMAIN=whatsapp-clone-116d2.firebaseapp.com
@@ -21,7 +22,6 @@ COPY client .
 
 RUN npm run build
 
-FROM node:16.16.0 AS Production
 
 ENV MONGODB_URL=mongodb+srv://admin:Sanket230597@cluster0.kcvew5q.mongodb.net/?retryWrites=true&w=majority
 ENV PUSHER_APPID=1444121
