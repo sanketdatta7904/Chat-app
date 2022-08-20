@@ -1,11 +1,5 @@
 FROM node:16.16.0
 
-ENV MONGODB_URL=mongodb+srv://admin:Sanket230597@cluster0.kcvew5q.mongodb.net/?retryWrites=true&w=majority
-ENV PUSHER_APPID=1444121
-ENV PUSHER_KEY=03dd74eaefa15e1b25a8
-ENV PUSHER_SECRET=0ba620fd0fa77562580e
-ENV PUSHER_CLUSTER=ap2
-ENV PUSHER_USETLS=true
 ENV REACT_APP_FIREBASE_API_KEY=AIzaSyAchyB8o6aYRd52_AcwnNmscl5oaRoCz3Y
 ENV REACT_APP_FIREBASE_AUTH_DOMAIN=whatsapp-clone-116d2.firebaseapp.com
 ENV REACT_APP_FIREBASE_PROJECT_ID=whatsapp-clone-116d2
@@ -28,6 +22,13 @@ COPY client .
 RUN npm run build
 
 FROM node:16.16.0 AS Production
+
+ENV MONGODB_URL=mongodb+srv://admin:Sanket230597@cluster0.kcvew5q.mongodb.net/?retryWrites=true&w=majority
+ENV PUSHER_APPID=1444121
+ENV PUSHER_KEY=03dd74eaefa15e1b25a8
+ENV PUSHER_SECRET=0ba620fd0fa77562580e
+ENV PUSHER_CLUSTER=ap2
+ENV PUSHER_USETLS=true
 
 WORKDIR /app
 
