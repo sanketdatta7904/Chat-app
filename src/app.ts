@@ -1,13 +1,12 @@
-import express from 'express';
-import path from 'path';
-import { ApiRouting } from './api.routing.js';
-import cors from 'cors';
-import mongoose from 'mongoose';
-import _ from "lodash"
-import {Config} from './config/config.js'
+import express from "express";
+import path from "path";
+import { ApiRouting } from "./api.routing.js";
+import cors from "cors";
+import mongoose from "mongoose";
+import _ from "lodash";
+import { Config } from "./config/config.js";
 // import pusher from "pusher"
-import Pusher from 'pusher';
-
+import Pusher from "pusher";
 
 // const requestIp = require('request-ip');
 class App {
@@ -19,14 +18,13 @@ class App {
     this.express = express();
     this.middleware();
     this.initializeControllers();
-
   }
 
   /**
    * database connection
    */
   private async database() {
-    const connectionUrl = Config.mongo.connectionUrl
+    const connectionUrl = Config.mongo.connectionUrl;
     // mongoose.connect(connectionUrl, {
     //     autoIndex: true,
     //     useNewUrlParser: true,
@@ -36,63 +34,62 @@ class App {
     async function run() {
       // 4. Connect to MongoDB
       mongoose.connect(connectionUrl, () => {
-        console.log("connected to database")
-      })
-      const db = mongoose.connection
+        console.log("connected to database");
+      });
+      const db = mongoose.connection;
       const pusher = new Pusher(Config.pusher);
       db.once("open", () => {
         console.log("DB Watch started");
-        const roomCollection = db.collection("rooms")
-        const roomStream = roomCollection.watch([], { fullDocument: 'updateLookup' })
+        const roomCollection = db.collection("rooms");
+        const roomStream = roomCollection.watch([], {
+          fullDocument: "updateLookup",
+        });
         roomStream.on("change", (change: any) => {
-          const roomDetails = change.fullDocument
-          let res: any = {}
-          let mongoEvent = ""
+          const roomDetails = change.fullDocument;
+          let res: any = {};
+          let mongoEvent = "";
           if (change.operationType === "insert") {
-
-            res = {}
-            mongoEvent = "create"
+            res = {};
+            mongoEvent = "create";
             pusher.trigger("rooms", "inserted", {
               name: roomDetails.name,
               _id: roomDetails._id,
               mongoEvent: mongoEvent,
-              messages: res
-            })
-
+              messages: res,
+            });
           } else if (change.operationType === "update") {
-
-            if (_.get(change, ["updateDescription", "updatedFields", "messages"])) {
-              let newMessage = _.get(change, ["updateDescription", "updatedFields", "messages"])
-              res = newMessage[0]
-
+            if (
+              _.get(change, ["updateDescription", "updatedFields", "messages"])
+            ) {
+              let newMessage = _.get(change, [
+                "updateDescription",
+                "updatedFields",
+                "messages",
+              ]);
+              res = newMessage[0];
             } else {
-              res = _.get(change, ["updateDescription", "updatedFields"], {})
+              res = _.get(change, ["updateDescription", "updatedFields"], {});
 
-              res = Object.values(res)[0]
+              res = Object.values(res)[0];
             }
-            mongoEvent = "update"
+            mongoEvent = "update";
             pusher.trigger("rooms", "updated", {
               name: roomDetails.name,
               _id: roomDetails._id,
               mongoEvent: mongoEvent,
-              messages: res
-            })
-          }else if (change.operationType === "delete") {
-
-            res = {}
-            mongoEvent = "delete"
+              messages: res,
+            });
+          } else if (change.operationType === "delete") {
+            res = {};
+            mongoEvent = "delete";
             pusher.trigger("rooms", "deleted", {
               _id: change.documentKey._id,
-            })
-
+            });
           }
-          
-        })
-      })
-
-
+        });
+      });
     }
-    run().catch(err => console.log(err));
+    run().catch((err) => console.log(err));
   }
 
   /**
@@ -101,9 +98,9 @@ class App {
   private middleware(): void {
     const corsOption = {
       credentials: true,
-      exposedHeaders: ['x-auth-token'],
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      origin: true
+      exposedHeaders: ["x-auth-token"],
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      origin: true,
     };
     this.express.use(cors(corsOption));
     this.express.use(express.urlencoded());
@@ -128,7 +125,7 @@ class App {
    */
   private initializeControllers() {
     this.InitRoute();
-    this.express.use('*', (req, res) => {
+    this.express.use("*", (req, res) => {
       res.status(404).send({ error: `\/${req.baseUrl}\/ doesn't exist` });
     });
   }
