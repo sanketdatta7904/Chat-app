@@ -55,7 +55,7 @@ function Sidebar() {
         return () => {
             pusher.unbind_all()
             pusher.unsubscribe("rooms")
-            pusher.unbind_global()
+            pusher.disconnect()
 
         }
     }, [rooms])
@@ -70,17 +70,17 @@ function Sidebar() {
     }
 
 
-    useEffect(() => { //MAnually unsubscribe
-        const pusher = new Pusher('03dd74eaefa15e1b25a8', {
-            cluster: 'ap2'
-        });
+    // useEffect(() => { //MAnually unsubscribe
+    //     const pusher = new Pusher('03dd74eaefa15e1b25a8', {
+    //         cluster: 'ap2'
+    //     });
 
-        return () => {
-            pusher.unbind_all()
-            pusher.unsubscribe("rooms")
-
-        }
-    })
+    //     return () => {
+    //         pusher.unbind_all()
+    //         pusher.unsubscribe("rooms")
+    //         pusher.disconnect()
+    //     }
+    // })
 
 
     const searchRoom = (e) => {

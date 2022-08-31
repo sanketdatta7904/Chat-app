@@ -129,8 +129,9 @@ function Chat() {
 
         });
         return () => {
-            pusher.unbind_all()
-            pusher.unsubscribe("rooms")
+        pusher.unbind_all()
+        pusher.unsubscribe("rooms")
+        pusher.disconnect()
         }
     }, [messages])
 
